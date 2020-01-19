@@ -1,9 +1,9 @@
 package kata_test
 
 import (
-	. "codewars/kyu8/count_the_monkeys/kata"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/tolbier/codewars/kyu8/count_the_monkeys/kata"
 	"testing"
 )
 
@@ -11,7 +11,6 @@ func TestKata(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Kata Suite")
 }
-
 
 var _ = Describe("monkeyCount", func() {
 	It("Should work for fixed tests", func() {

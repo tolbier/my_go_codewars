@@ -1,9 +1,9 @@
 package kata_test
 
 import (
-	. "codewars/kyu8/is-divisible/kata"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/tolbier/codewars/kyu8/is-divisible/kata"
 	"testing"
 )
 

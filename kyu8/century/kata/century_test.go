@@ -1,10 +1,10 @@
 package kata_test
 
 import (
-. "codewars/kyu8/century/kata"
-. "github.com/onsi/ginkgo"
-. "github.com/onsi/gomega"
-"testing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	. "github.com/tolbier/codewars/kyu8/century/kata"
+	"testing"
 )
 
 func TestKata(t *testing.T) {
