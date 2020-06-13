@@ -1,9 +1,8 @@
-package kata_test
+package kata
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/tolbier/codewars/kyu8/maps/kata"
 	"testing"
 )
 
