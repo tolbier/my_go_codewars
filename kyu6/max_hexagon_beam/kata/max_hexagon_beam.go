@@ -46,12 +46,6 @@ func (m *HexMatrix) fill(seq []int) {
 		}
 	}
 }
-func (c *Cell) cellRight() *Cell {
-	if result, ok := c.hexMatrix.matrix[Coords{c.x + 2, c.y}]; ok {
-		return result
-	}
-	return nil
-}
 
 func (c *Cell) nextCoords(direction Direction) (co *Coords) {
 	var x, y int
@@ -83,12 +77,16 @@ func (c *Cell) Spread() {
 		c.beam[dir] = c.value
 		if nextCell := c.next(dir); nextCell != nil {
 			if nextCell.beam != nil {
-				c.beam[dir] += (*nextCell.beam)[dir]
-				if c.beam[dir] > c.hexMatrix.maxBeam {
-					c.hexMatrix.maxBeam = c.beam[dir]
-				}
+				c.setNextBeam(dir, nextCell)
 			}
 		}
+	}
+}
+
+func (c *Cell) setNextBeam(dir Direction, nextCell *Cell) {
+	c.beam[dir] += (*nextCell.beam)[dir]
+	if c.beam[dir] > c.hexMatrix.maxBeam {
+		c.hexMatrix.maxBeam = c.beam[dir]
 	}
 }
 func abs(i int) int {
