@@ -36,25 +36,15 @@ func NewHexMatrix(n int) *HexMatrix {
 }
 func (m *HexMatrix) fill(seq []int) {
 	idxSeq := 0
-	for y := 0; y < m.diameter(); y++ {
-		for x := m.startX(y); x <= m.endX(y); x += 2 {
+	for y := 0; y < 2*m.n-1; y++ {
+		startX := abs(m.n - y - 1)
+		for x := startX; x <= (4*m.n-4)-startX; x += 2 {
 			cell := Cell{Coords{x, y}, seq[idxSeq], nil, m}
 			m.matrix[cell.Coords] = &cell
 			idxSeq++
 			idxSeq %= len(seq)
 		}
 	}
-}
-func (m *HexMatrix) diameter() int {
-	return 2*m.n - 1
-}
-
-func (m *HexMatrix) startX(y int) int {
-	return abs(m.n - y - 1)
-}
-
-func (m *HexMatrix) endX(y int) int {
-	return 2*(m.diameter()-1) - m.startX(y)
 }
 func (c *Cell) cellRight() *Cell {
 	if result, ok := c.hexMatrix.matrix[Coords{c.x + 2, c.y}]; ok {
@@ -83,18 +73,20 @@ func (c *Cell) next(direction Direction) *Cell {
 	return nil
 }
 func (c *Cell) Spread() {
+	c.beam = &[3]int{}
 	for _, dir := range Directions {
 		if nextCell := c.next(dir); nextCell != nil {
 			if nextCell.beam == nil {
 				nextCell.Spread()
 			}
 		}
-	}
-	c.beam = &[3]int{c.value, c.value, c.value}
-	for _, dir := range Directions {
+		c.beam[dir] = c.value
 		if nextCell := c.next(dir); nextCell != nil {
 			if nextCell.beam != nil {
 				c.beam[dir] += (*nextCell.beam)[dir]
+				if c.beam[dir] > c.hexMatrix.maxBeam {
+					c.hexMatrix.maxBeam = c.beam[dir]
+				}
 			}
 		}
 	}
