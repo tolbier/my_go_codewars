@@ -1,102 +1,133 @@
 package kata
 
 import (
+	"fmt"
 	"math"
 )
 
 type Direction uint8
 
-const (
-	Up Direction = iota
-	Right
-	Down
-)
+var offsets = [...]Coords{
+	{1, -1},
+	{2, 0},
+	{1, 1},
+	{-1, 1},
+	{-2, 0},
+	{-1, -1},
+}
 
-var Directions = []Direction{Up, Right, Down}
+func abs(i int) int {
+	if i < 0 {
+		i *= -1
+	}
+	return i
+}
+
+const NE Direction = 0
+
+func (d Direction) next() Direction {
+	return (d + 1) % 6
+}
 
 type Coords struct {
 	x int
 	y int
 }
+
+func (c Coords) nextCoords(dir Direction) (co Coords) {
+	offset := offsets[dir]
+	return Coords{c.x + offset.x, c.y + offset.y}
+}
+
 type Cell struct {
 	Coords
-	value     int
-	beam      *[3]int
+	value     int64
 	hexMatrix *HexMatrix
 }
+
+func (c *Cell) nextCoords(dir Direction) (co Coords) {
+	return c.Coords.nextCoords(dir)
+}
+
+func (c *Cell) next(direction Direction) *Cell {
+	coords := c.nextCoords(direction)
+	return c.hexMatrix.getCell(coords)
+}
+
+func (c *Cell) getBeam(to Direction) (beam int64) {
+	next := c.next(to)
+	beam = c.value
+	if next != nil {
+		beam += next.getBeam(to)
+	}
+	return
+}
+
 type HexMatrix struct {
 	matrix  map[Coords]*Cell
 	n       int
-	maxBeam int
+	maxBeam int64
+}
+
+func NewCell(x, y int, value int64, hm *HexMatrix) *Cell {
+	return &Cell{Coords: Coords{x, y}, value: value, hexMatrix: hm}
 }
 
 func NewHexMatrix(n int) *HexMatrix {
 	matrix := make(map[Coords]*Cell)
-	return &HexMatrix{matrix: matrix, n: n}
+	return &HexMatrix{matrix: matrix, n: n, maxBeam: math.MinInt64}
 }
-func (m *HexMatrix) fill(seq []int) {
+
+func (hm *HexMatrix) fill(seq []int) {
 	idxSeq := 0
-	for y := 0; y < 2*m.n-1; y++ {
-		startX := abs(m.n - y - 1)
-		for x := startX; x <= (4*m.n-4)-startX; x += 2 {
-			cell := Cell{Coords{x, y}, seq[idxSeq], nil, m}
-			m.matrix[cell.Coords] = &cell
+	for y := 0; y < 2*hm.n-1; y++ {
+		startX := abs(hm.n - y - 1)
+		for x := startX; x <= (4*hm.n-4)-startX; x += 2 {
+			cell := NewCell(x, y, int64(seq[idxSeq]), hm)
+			hm.setCell(cell)
 			idxSeq++
 			idxSeq %= len(seq)
 		}
 	}
 }
 
-func (c *Cell) nextCoords(direction Direction) (co *Coords) {
-	var x, y int
-	switch direction {
-	case Up:
-		x, y = c.x+1, c.y-1
-	case Right:
-		x, y = c.x+2, c.y
-	case Down:
-		x, y = c.x+1, c.y+1
+func (hm *HexMatrix) checkMaxBeam(beam int64) {
+	if beam > hm.maxBeam {
+		hm.maxBeam = beam
 	}
-	return &Coords{x, y}
 }
-func (c *Cell) next(direction Direction) *Cell {
-	coords := *c.nextCoords(direction)
-	if result, ok := c.hexMatrix.matrix[coords]; ok {
-		return result
+func (hm *HexMatrix) calculateMaxBeam() int64 {
+	initCell := hm.getCell(Coords{1, hm.n - 2})
+	//lastCell := initCell.next(2)
+	cell := initCell
+	beamDir := NE + 1
+	for nextDir := NE; beamDir != NE; beamDir = nextDir.next() {
+		cell = hm.calcBeamBatch(cell, nextDir)
+		nextDir = beamDir
 	}
-	return nil
+	return hm.maxBeam
 }
-func (c *Cell) Spread() {
-	c.beam = &[3]int{}
-	for _, dir := range Directions {
-		if nextCell := c.next(dir); nextCell != nil {
-			if nextCell.beam == nil {
-				nextCell.Spread()
-			}
+func (hm *HexMatrix) calcBeamBatch(initCell *Cell, nextDir Direction) (lastCell *Cell) {
+	for ; initCell != nil; initCell = initCell.next(nextDir) {
+		if initCell.Coords.x == 9 && initCell.Coords.y == 18 {
+			fmt.Print("")
 		}
-		c.beam[dir] = c.value
-		if nextCell := c.next(dir); nextCell != nil {
-			if nextCell.beam != nil {
-				c.setNextBeam(dir, nextCell)
-			}
-		}
+		hm.checkMaxBeam(initCell.getBeam(nextDir.next()))
+		lastCell = initCell
 	}
+	return
 }
 
-func (c *Cell) setNextBeam(dir Direction, nextCell *Cell) {
-	c.beam[dir] += (*nextCell.beam)[dir]
-	if c.beam[dir] > c.hexMatrix.maxBeam {
-		c.hexMatrix.maxBeam = c.beam[dir]
-	}
+func (hm *HexMatrix) setCell(cell *Cell) {
+	hm.matrix[cell.Coords] = cell
 }
-func abs(i int) int {
-	return int(math.Abs(float64(i)))
+func (hm *HexMatrix) getCell(coords Coords) (c *Cell) {
+	c, _ = hm.matrix[coords]
+	return
 }
+
 func MaxHexagonBeam(n int, seq []int) int {
 	hm := NewHexMatrix(n)
 	hm.fill(seq)
-	initCell := hm.matrix[Coords{0, n - 1}]
-	initCell.Spread()
-
-	return hm.maxBeam
+	return int(hm.calculateMaxBeam())
 }

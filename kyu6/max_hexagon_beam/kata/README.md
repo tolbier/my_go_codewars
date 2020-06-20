@@ -1,5 +1,7 @@
 # Hexagon Beam Max Sum
 
+* From https://www.codewars.com/kata/5ecc1d68c6029000017d8aaf/train/go
+
 In this kata, your task is to find the maximum sum of any straight "beam" on a hexagonal grid, where its cell values are determined by a finite integer sequence seq.
 
 In this context, a beam is a linear sequence of cells in any of the 3 pairs of opposing sides of a hexagon. We'll refer to the sum of a beam's integer values as the "beam value".
