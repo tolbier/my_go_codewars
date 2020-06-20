@@ -50,7 +50,7 @@ func (c *Cell) nextCoords(dir Direction) (co Coords) {
 
 func (c *Cell) next(direction Direction) *Cell {
 	coords := c.nextCoords(direction)
-	return c.hexMatrix.getCell(coords)
+	return c.hexMatrix.getCell(coords.x, coords.y)
 }
 
 func (c *Cell) getBeam(to Direction) (beam int64) {
@@ -96,7 +96,7 @@ func (hm *HexMatrix) checkMaxBeam(beam int64) {
 	}
 }
 func (hm *HexMatrix) calculateMaxBeam() int64 {
-	initCell := hm.getCell(Coords{1, hm.n - 2})
+	initCell := hm.getCell(1, hm.n-2)
 	cell := initCell
 	for nextDir := NE; cell != initCell.next(3); nextDir = nextDir.next() {
 		cell = hm.calcBeamBatch(cell, nextDir)
@@ -114,8 +114,9 @@ func (hm *HexMatrix) calcBeamBatch(initCell *Cell, nextDir Direction) (lastCell 
 func (hm *HexMatrix) setCell(cell *Cell) {
 	hm.matrix[cell.Coords] = cell
 }
-func (hm *HexMatrix) getCell(coords Coords) (c *Cell) {
-	c, _ = hm.matrix[coords]
+
+func (hm *HexMatrix) getCell(x, y int) (c *Cell) {
+	c, _ = hm.matrix[Coords{x, y}]
 	return
 }
 
