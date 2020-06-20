@@ -1,7 +1,6 @@
 package kata
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -98,20 +97,14 @@ func (hm *HexMatrix) checkMaxBeam(beam int64) {
 }
 func (hm *HexMatrix) calculateMaxBeam() int64 {
 	initCell := hm.getCell(Coords{1, hm.n - 2})
-	//lastCell := initCell.next(2)
 	cell := initCell
-	beamDir := NE + 1
-	for nextDir := NE; beamDir != NE; beamDir = nextDir.next() {
+	for nextDir := NE; cell != initCell.next(3); nextDir = nextDir.next() {
 		cell = hm.calcBeamBatch(cell, nextDir)
-		nextDir = beamDir
 	}
 	return hm.maxBeam
 }
 func (hm *HexMatrix) calcBeamBatch(initCell *Cell, nextDir Direction) (lastCell *Cell) {
 	for ; initCell != nil; initCell = initCell.next(nextDir) {
-		if initCell.Coords.x == 9 && initCell.Coords.y == 18 {
-			fmt.Print("")
-		}
 		hm.checkMaxBeam(initCell.getBeam(nextDir.next()))
 		lastCell = initCell
 	}
