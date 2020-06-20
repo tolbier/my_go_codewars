@@ -68,8 +68,8 @@ type HexMatrix struct {
 	maxBeam int64
 }
 
-func NewCell(x, y int, value int64, hm *HexMatrix) *Cell {
-	return &Cell{Coords: Coords{x, y}, value: value, hexMatrix: hm}
+func NewCell(x, y int, value int64) *Cell {
+	return &Cell{Coords: Coords{x, y}, value: value}
 }
 
 func NewHexMatrix(n int) *HexMatrix {
@@ -82,7 +82,7 @@ func (hm *HexMatrix) fill(seq []int) {
 	for y := 0; y < 2*hm.n-1; y++ {
 		startX := abs(hm.n - y - 1)
 		for x := startX; x <= (4*hm.n-4)-startX; x += 2 {
-			cell := NewCell(x, y, int64(seq[idxSeq]), hm)
+			cell := NewCell(x, y, int64(seq[idxSeq]))
 			hm.setCell(cell)
 			idxSeq++
 			idxSeq %= len(seq)
@@ -113,6 +113,7 @@ func (hm *HexMatrix) calcBeamBatch(initCell *Cell, nextDir Direction) (lastCell 
 
 func (hm *HexMatrix) setCell(cell *Cell) {
 	hm.matrix[cell.Coords] = cell
+	cell.hexMatrix = hm
 }
 
 func (hm *HexMatrix) getCell(x, y int) (c *Cell) {
